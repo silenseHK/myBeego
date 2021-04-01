@@ -19,7 +19,7 @@ func (s GameService)GetPreGame(gamePlay *models.GamePlay, gameId int){
 	O.QueryTable(new(models.GamePlay)).Filter("game_id", gameId).Filter("end_time__lt", rightNow).OrderBy("-end_time").One(gamePlay,"Id","PrizeNumber")
 }
 
-func (s GameService)GetPreGame10(list *[]models.GamePlay, gameId int){
+func (s GameService)GetPreGameList(list *[]models.GamePlay, gameId, offset, limit int){
 	rightNow := time.Now().Unix()
-	O.QueryTable(new(models.GamePlay)).Filter("game_id", gameId).Filter("end_time__lt", rightNow).OrderBy("-end_time").Limit(10).All(list,"Id","PrizeNumber","Number")
+	O.QueryTable(new(models.GamePlay)).Filter("game_id", gameId).Filter("end_time__lt", rightNow).OrderBy("-end_time").Offset(offset).Limit(limit).All(list,"Id","PrizeNumber","Number")
 }

@@ -9,4 +9,5 @@ import (
 func init() {
     beego.Router("/", &controllers.MainController{})
     beego.Router("/game", &api.GameController{})
+    beego.Router("/game2", &api.GameController{},"get:GameStart")
 }

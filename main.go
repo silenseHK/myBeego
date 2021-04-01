@@ -8,6 +8,6 @@ import (
 )
 
 func main() {
-	beego.Run()
+	beego.RunWithMiddleWares("localhost:8090")
 }
 
