@@ -1,9 +1,12 @@
 package api
 
 import (
+	"github.com/astaxie/beego"
+	"github.com/shopspring/decimal"
 	"hello/models"
 	"hello/service"
 	"sync"
+	"time"
 )
 
 type GameController struct {
@@ -22,11 +25,14 @@ func  (c *GameController) Prepare(){
 	userService = new(service.UserService)
 }
 
-
 /*
 	获取本期数据
  */
 func (c *GameController) Get(){
+	c.ReturnJson()
+}
+
+func (c *GameController)GameStart(){  //测试协程和不协程的请求时间
 	gameId,_ := c.GetInt("game_id")
 	userId,_ := c.GetInt("user_id")
 
@@ -79,62 +85,89 @@ func (c *GameController) Get(){
 	})
 }
 
-func (c *GameController)GameStart(){  //测试协程和不协程的请求时间
-	gameId,_ := c.GetInt("game_id")
-	userId,_ := c.GetInt("user_id")
-
-	var (
-		gamePlay models.GamePlay
-		user models.Users
-		preGamePlay models.GamePlay
-		preList []models.GamePlay
-		orderList []models.GameBetting
-	)
-
-	//本期数据
-	gs := new(service.GameService)
-	gs.GetGameStart(&gamePlay, gameId)
-	//用户数据
-	us := new(service.UserService)
-	us.GetUser(&user, userId)
-	//上期数据
-	gs2 := new(service.GameService)
-	gs2.GetPreGame(&preGamePlay, gameId)
-	//往十期的结果
-	new(service.GameService).GetPreGameList(&preList, gameId,1,10)
-	//用户的投注订单
-	new(service.UserService).GetUserOrders(&orderList,userId,gameId,5)
-
-	c.ReturnJsonWithData(200,"", map[string]interface{}{
-		"game_play": gamePlay,
-		"user": user,
-		"pre_game_play": preGamePlay,
-		"pre_list": preList,
-		"order_list": orderList,
-	})
-}
-
 func (c *GameController)Betting(){
-	//userId,err := c.GetInt("user_id")
-	//if err != nil{
-	//	c.ReturnJsonWithData(300,"参数缺失","")
-	//	return
-	//}
-	//gameId,err := c.GetInt("game_id")
-	//if err != nil{
-	//	c.ReturnJsonWithData(300,"参数缺失","")
-	//	return
-	//}
-	//gameConfigId,err := c.GetInt("game_c_id")
-	//if err != nil{
-	//	c.ReturnJsonWithData(300,"参数缺失","")
-	//	return
-	//}
-	//bettingMoney,err := c.GetFloat("betting_money")
-	//if err != nil{
-	//	c.ReturnJsonWithData(300,"参数缺失","")
-	//	return
-	//}
+	userId,err := c.GetInt("user_id")
+	if err != nil{
+		c.ReturnJsonWithData(300,c.Lang["params"]["miss"],"")
+		return
+	}
+	gameId,err := c.GetInt("game_id")
+	if err != nil{
+		c.ReturnJsonWithData(300,c.Lang["params"]["miss"],"")
+		return
+	}
+	gameConfigId,err := c.GetInt("game_c_id")
+	if err != nil{
+		c.ReturnJsonWithData(300,c.Lang["params"]["miss"],"")
+		return
+	}
+	bettingMoney,err := c.GetFloat("betting_money")
+	if err != nil{
+		c.ReturnJsonWithData(300,c.Lang["params"]["miss"],"")
+		return
+	}
+	user := models.Users{}
+	e := userService.GetUser(&user, userId)
+	if e != nil{
+		beego.Error(e)
+		return
+	}
+	if user.Balance < bettingMoney{
+		beego.Error(c.Lang["balance"]["less"])
+		return
+	}
+	gamePlay,e := gameService.GetGame(gameId)
+	if e != nil{
+		beego.Error(e)
+		return
+	}
+	if gamePlay.EndTime + 10 <= time.Now().Unix(){
+		beego.Error(c.Lang["game"]["timeOut"])
+		return
+	}
+	gameConfig,e := gameService.GetGameConfig(gameConfigId)
+	if e != nil{
+		beego.Error(e)
+		return
+	}
+	if gameConfig.GameId != gamePlay.GameId{
+		beego.Error(c.Lang["game"]["chooseWrong"])
+	}
+
+	TO,_ := c.O.Begin()
+	wcBalance := decimal.NewFromFloat(user.Balance).Sub(decimal.NewFromFloat(bettingMoney))
+	wcBalanceF,_ := wcBalance.Float64()
+	//增加用户余额变动记录
+	userService.AddBalanceLog(userId, user.Balance, wcBalanceF,1)
+
+	//修改用户余额
+	user.Balance = wcBalanceF
+	if _,e = c.O.Update(&user); e!=nil{
+		beego.Error(c.Lang["game"]["balanceDeductionFail"])
+		TO.Rollback()
+		return
+	}
+
+	serviceCharge,_ := decimal.NewFromFloat(bettingMoney).Mul(decimal.NewFromFloat(0.97)).Round(2).Float64()
+	money,_ := decimal.NewFromFloat(bettingMoney).Sub(decimal.NewFromFloat(serviceCharge)).Float64()
+	gameBetting := models.GameBetting{
+		BettingNum: gamePlay.Number,
+		UserId: userId,
+		GameId: gamePlay.GameId,
+		GamePId: gamePlay.Id,
+		GameCXId: gameConfigId,
+		Money: money,
+		Odds: gameConfig.Odds,
+		BettingTime: time.Now().Unix(),
+		ServiceCharge: serviceCharge,
+	}
+	_,e = c.O.Insert(&gameBetting)
+	if e != nil{
+		beego.Error(c.Lang["game"]["bettingFail"])
+		TO.Rollback()
+		return
+	}
+
 }
 
 func (c *GameController) PushGame(){

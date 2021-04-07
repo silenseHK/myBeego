@@ -23,3 +23,13 @@ func (s GameService)GetPreGameList(list *[]models.GamePlay, gameId, offset, limi
 	rightNow := time.Now().Unix()
 	O.QueryTable(new(models.GamePlay)).Filter("game_id", gameId).Filter("end_time__lt", rightNow).OrderBy("-end_time").Offset(offset).Limit(limit).All(list,"Id","PrizeNumber","Number")
 }
+
+func (s GameService)GetGame(id int)(gamePlay models.GamePlay, err error){
+	err = O.QueryTable(new(models.GamePlay)).Filter("id", id).One(&gamePlay)
+	return
+}
+
+func (s GameService)GetGameConfig(id int)(gameConfig models.GameConfig, err error){
+	err = O.QueryTable(new(models.GamePlay)).Filter("id", id).One(&gameConfig)
+	return
+}

@@ -1,6 +1,8 @@
 package api
 
-import "hello/controllers"
+import (
+	"hello/controllers"
+)
 
 type BaseApiController struct {
 	controllers.BaseController

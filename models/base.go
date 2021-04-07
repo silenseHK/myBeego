@@ -7,9 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const (
-	DatabasePrefix string = "cx_"
-)
+var DatabasePrefix string
 
 func init(){
 	orm.RegisterDriver("mysql", orm.DRMySQL)
@@ -18,6 +16,7 @@ func init(){
 		fmt.Println("数据库配置获取失败,失败原因:" + err.Error())
 		return
 	}
+	DatabasePrefix = databaseConf.String("prefix")
 
 	dataSource := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s",
 		databaseConf.String("user"),
@@ -36,6 +35,8 @@ func init(){
 		new(GamePlay),
 		new(Users),
 		new(GameBetting),
+		new(GameConfig),
+		new(UserBalanceLogs),
 	}
 
 	orm.RegisterModelWithPrefix(DatabasePrefix, modelArr...)

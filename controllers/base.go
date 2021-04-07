@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/astaxie/beego"
 	"github.com/beego/beego/v2/client/orm"
-	beego "github.com/beego/beego/v2/server/web"
 	"hello/libs"
+	"hello/local"
 	"net/http"
 )
 
@@ -14,6 +15,7 @@ type BaseController struct {
 	beego.Controller
 	RtnJson
 	O orm.Ormer
+	Lang map[string]map[string]string
 }
 
 type RtnJson struct{
@@ -28,6 +30,7 @@ func (c *BaseController) Prepare(){
 	c.RtnJson.Data = ""
 
 	c.O = orm.NewOrm()
+	c.Lang = local.En
 }
 
 func (c *BaseController) ReturnJson(){
@@ -41,16 +44,3 @@ func (c *BaseController) ReturnJsonWithData(code int, msg string, data interface
 	c.RtnJson.Data = data
 	c.ReturnJson()
 }
-
-//func (c *BaseController) Validate(params map[string]string)map[string]interface{}{
-//	var rtn map[string]interface{}
-//	for k,v := range params{
-//		c.perValidate(&rtn,k,v)
-//	}
-//	return rtn
-//}
-//
-//func (c *BaseController) perValidate(rtn *map[string]interface{}, field string, kind string){
-//	kind = "Get" + strings.ToUpper(string([]byte(kind)[0])) + string([]byte(kind)[1:len(kind)])
-//	reflect.ValueOf(c)
-//}

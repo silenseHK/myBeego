@@ -7,7 +7,7 @@ type GamePlay struct{
 	PrizeNumber string `json:"prize_number"`
 	Status int `json:"status"`
 	PrizeTime int `json:"prize_time"`
-	EndTime int `json:"end_time"`
+	EndTime int64 `json:"end_time"`
 	StartTime int `json:"start_time"`
 	Type int `json:"type"`
 	Winmoney int `json:"winmoney"`
