@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/context"
 	"hello/tools"
+	"strconv"
 	"strings"
 )
 
@@ -16,15 +17,13 @@ func CheckUserToken(ctx *context.Context){
 		return
 	}
 
-	//newToken := tools.EncryptToken(12345678)
-	//fmt.Println(newToken)
 	userId,err := tools.DecryptToken(fmt.Sprintf(strings.Join(token,"")))
 	if err != nil{
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(userId)
-	fmt.Println(ctx.Request.Body)
+	ctx.Input.SetParam("UserId",strconv.FormatInt(userId,10))
 	return
 }
 

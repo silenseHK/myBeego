@@ -35,7 +35,6 @@ func (c *GameController) Get(){
 func (c *GameController)GameStart(){  //测试协程和不协程的请求时间
 	gameId,_ := c.GetInt("game_id")
 	userId,_ := c.GetInt("user_id")
-
 	var (
 		gamePlay models.GamePlay
 		user models.Users
