@@ -1,35 +1,30 @@
 package middlewares
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"github.com/astaxie/beego/context"
+	"hello/tools"
+	"strings"
 )
 
-type ResponseWithRecorder struct{
-	ResponseWriter  http.ResponseWriter
-	statusCode     int
-	body           bytes.Buffer
+func CheckUserToken(ctx *context.Context){
+	header := ctx.Request.Header
+	fmt.Println(header)
+	token,ok := header["Token"]
+	if !ok {
+		ctx.WriteString("缺少token")
+		return
+	}
+
+	//newToken := tools.EncryptToken(12345678)
+	//fmt.Println(newToken)
+	userId,err := tools.DecryptToken(fmt.Sprintf(strings.Join(token,"")))
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(userId)
+	fmt.Println(ctx.Request.Body)
+	return
 }
 
-func AccessMiddle(f http.Handler)http.Handler{
-	// 创建一个新的handler包装http.HandlerFunc
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		buf, _ := ioutil.ReadAll(r.Body)
-		rdr := ioutil.NopCloser(bytes.NewBuffer(buf))
-
-		//write
-		r.Body = rdr
-
-		wc := &ResponseWithRecorder{
-			ResponseWriter: w,
-			statusCode:     http.StatusOK,
-			body:           bytes.Buffer{},
-		}
-		// 调用下一个中间件或者最终的handler处理程序
-		f.ServeHTTP(w, r)
-
-		fmt.Println(wc)
-	})
-}
