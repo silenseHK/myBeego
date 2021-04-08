@@ -16,6 +16,7 @@ func init(){
 		fmt.Println("数据库配置获取失败,失败原因:" + err.Error())
 		return
 	}
+
 	DatabasePrefix = databaseConf.String("prefix")
 
 	dataSource := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s",
@@ -30,7 +31,6 @@ func init(){
 		fmt.Println("数据库连接失败,失败愿因:" + err2.Error())
 		return
 	}
-
 	var modelArr = []interface{}{
 		new(GamePlay),
 		new(Users),

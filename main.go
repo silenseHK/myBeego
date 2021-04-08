@@ -5,6 +5,7 @@ import (
 	_ "hello/models"
 	_ "hello/routers"
 	_ "hello/service"
+	_ "hello/tools"
 )
 
 func main() {

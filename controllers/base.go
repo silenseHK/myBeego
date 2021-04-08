@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/beego/beego/v2/client/orm"
-	"hello/libs"
-	"hello/local"
 	"net/http"
 )
 
@@ -25,12 +23,7 @@ type RtnJson struct{
 }
 
 func (c *BaseController) Prepare(){
-	c.RtnJson.Code = libs.Success
-	c.RtnJson.Msg = "success"
-	c.RtnJson.Data = ""
 
-	c.O = orm.NewOrm()
-	c.Lang = local.En
 }
 
 func (c *BaseController) ReturnJson(){

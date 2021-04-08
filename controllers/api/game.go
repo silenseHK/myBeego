@@ -1,8 +1,9 @@
 package api
 
 import (
-	"github.com/astaxie/beego"
+	"fmt"
 	"github.com/shopspring/decimal"
+	"hello/libs"
 	"hello/models"
 	"hello/service"
 	"sync"
@@ -85,7 +86,8 @@ func (c *GameController)GameStart(){  //测试协程和不协程的请求时间
 }
 
 func (c *GameController)Betting(){
-	userId,err := c.GetInt("user_id")
+	fmt.Println(c.O)
+	userId,err := c.GetInt("UserId")
 	if err != nil{
 		c.ReturnJsonWithData(300,c.Lang["params"]["miss"],"")
 		return
@@ -108,29 +110,30 @@ func (c *GameController)Betting(){
 	user := models.Users{}
 	e := userService.GetUser(&user, userId)
 	if e != nil{
-		beego.Error(e)
+		c.ReturnJsonWithData(300,e.Error(),"")
 		return
 	}
 	if user.Balance < bettingMoney{
-		beego.Error(c.Lang["balance"]["less"])
+		c.ReturnJsonWithData(300,c.Lang["balance"]["less"],"")
 		return
 	}
 	gamePlay,e := gameService.GetGame(gameId)
 	if e != nil{
-		beego.Error(e)
+		c.ReturnJsonWithData(300,e.Error(),"")
 		return
 	}
 	if gamePlay.EndTime + 10 <= time.Now().Unix(){
-		beego.Error(c.Lang["game"]["timeOut"])
+		c.ReturnJsonWithData(300,c.Lang["game"]["timeOut"],"")
 		return
 	}
 	gameConfig,e := gameService.GetGameConfig(gameConfigId)
 	if e != nil{
-		beego.Error(e)
+		c.ReturnJsonWithData(300,e.Error(),"")
 		return
 	}
 	if gameConfig.GameId != gamePlay.GameId{
-		beego.Error(c.Lang["game"]["chooseWrong"])
+		c.ReturnJsonWithData(300,c.Lang["game"]["chooseWrong"],"")
+		return
 	}
 
 	TO,_ := c.O.Begin()
@@ -142,7 +145,7 @@ func (c *GameController)Betting(){
 	//修改用户余额
 	user.Balance = wcBalanceF
 	if _,e = c.O.Update(&user); e!=nil{
-		beego.Error(c.Lang["game"]["balanceDeductionFail"])
+		c.ReturnJsonWithData(300,c.Lang["game"]["balanceDeductionFail"],"")
 		TO.Rollback()
 		return
 	}
@@ -162,11 +165,12 @@ func (c *GameController)Betting(){
 	}
 	_,e = c.O.Insert(&gameBetting)
 	if e != nil{
-		beego.Error(c.Lang["game"]["bettingFail"])
+		c.ReturnJsonWithData(300,c.Lang["game"]["bettingFail"],"")
 		TO.Rollback()
 		return
 	}
-
+	TO.Commit()
+	c.ReturnJsonWithData(libs.Success, c.Lang["game"]["bettingSuccess"],"")
 }
 
 func (c *GameController) PushGame(){

@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"hello/controllers"
 	"hello/controllers/api"
@@ -15,12 +14,14 @@ func init() {
     //beego.Router("/game2", &api.GameController{},"get:GameStart")
 
     gamePath := beego.AppConfig.String("gamePath")
-    fmt.Println(gamePath)
     ns :=
     	beego.NewNamespace("/" + gamePath,
     			beego.NSBefore(middlewares.CheckUserToken),
     			beego.NSRouter("/", &api.GameController{}),
     			beego.NSRouter("/start", &api.GameController{},"post:GameStart"),
+    			beego.NSRouter("/betting", &api.GameController{},"post:Betting"),
     		)
     beego.AddNamespace(ns)
+
+    beego.Router("/login",&api.UserController{},"post:Login")
 }

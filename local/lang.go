@@ -12,5 +12,6 @@ var En = map[string]map[string]string{
 		"chooseWrong": "wrong choose",
 		"balanceDeductionFail": "Balance deduction fail",
 		"bettingFail": "Betting fail",
+		"bettingSuccess": "Betting success",
 	},
 }
