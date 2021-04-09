@@ -2,8 +2,10 @@ package api
 
 import (
 	"fmt"
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/shopspring/decimal"
 	"hello/libs"
+	"hello/local"
 	"hello/models"
 	"hello/service"
 	"sync"
@@ -22,6 +24,8 @@ var (
 )
 
 func  (c *GameController) Prepare(){
+	c.O = orm.NewOrm()
+	c.Lang = local.En
 	gameService = new(service.GameService)
 	userService = new(service.UserService)
 }
@@ -86,7 +90,6 @@ func (c *GameController)GameStart(){  //测试协程和不协程的请求时间
 }
 
 func (c *GameController)Betting(){
-	fmt.Println(c.O)
 	userId,err := c.GetInt("UserId")
 	if err != nil{
 		c.ReturnJsonWithData(300,c.Lang["params"]["miss"],"")
@@ -113,6 +116,7 @@ func (c *GameController)Betting(){
 		c.ReturnJsonWithData(300,e.Error(),"")
 		return
 	}
+	fmt.Println(user)
 	if user.Balance < bettingMoney{
 		c.ReturnJsonWithData(300,c.Lang["balance"]["less"],"")
 		return

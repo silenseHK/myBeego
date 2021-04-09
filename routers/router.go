@@ -1,27 +1,21 @@
 package routers
 
 import (
-	"github.com/astaxie/beego"
-	"hello/controllers"
+	"github.com/beego/beego/v2/server/web"
 	"hello/controllers/api"
 	"hello/middlewares"
 )
 
-
 func init() {
-    beego.Router("/", &controllers.MainController{})
-    //beego.Router("/game", &api.GameController{})
-    //beego.Router("/game2", &api.GameController{},"get:GameStart")
-
-    gamePath := beego.AppConfig.String("gamePath")
+    gamePath,_ := web.AppConfig.String("gamePath")
     ns :=
-    	beego.NewNamespace("/" + gamePath,
-    			beego.NSBefore(middlewares.CheckUserToken),
-    			beego.NSRouter("/", &api.GameController{}),
-    			beego.NSRouter("/start", &api.GameController{},"post:GameStart"),
-    			beego.NSRouter("/betting", &api.GameController{},"post:Betting"),
+    	web.NewNamespace("/" + gamePath,
+    			web.NSBefore(middlewares.CheckUserToken),
+    			web.NSRouter("/", &api.GameController{}),
+    			web.NSRouter("/start", &api.GameController{},"post:GameStart"),
+				web.NSRouter("/betting", &api.GameController{},"post:Betting"),
     		)
-    beego.AddNamespace(ns)
+	web.AddNamespace(ns)
 
-    beego.Router("/login",&api.UserController{},"post:Login")
+	web.Router("/login",&api.UserController{},"post:Login")
 }

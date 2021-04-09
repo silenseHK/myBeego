@@ -30,6 +30,6 @@ func (s GameService)GetGame(id int)(gamePlay models.GamePlay, err error){
 }
 
 func (s GameService)GetGameConfig(id int)(gameConfig models.GameConfig, err error){
-	err = O.QueryTable(new(models.GamePlay)).Filter("id", id).One(&gameConfig)
+	err = O.QueryTable(new(models.GameConfig)).Filter("id", id).One(&gameConfig)
 	return
 }

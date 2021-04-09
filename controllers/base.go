@@ -2,15 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/astaxie/beego"
 	"github.com/beego/beego/v2/client/orm"
-	"net/http"
+	"github.com/beego/beego/v2/server/web"
 )
 
-type Middleware func(handler http.Handler) http.Handler
-
 type BaseController struct {
-	beego.Controller
+	web.Controller
 	RtnJson
 	O orm.Ormer
 	Lang map[string]map[string]string
@@ -20,10 +17,6 @@ type RtnJson struct{
 	Code int `json:"code"`
 	Msg string `json:"msg"`
 	Data interface{} `json:"data"`
-}
-
-func (c *BaseController) Prepare(){
-
 }
 
 func (c *BaseController) ReturnJson(){

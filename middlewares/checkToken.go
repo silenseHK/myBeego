@@ -2,13 +2,13 @@ package middlewares
 
 import (
 	"fmt"
-	"github.com/astaxie/beego/context"
+	"github.com/beego/beego/v2/server/web/context"
 	"hello/tools"
 	"strconv"
 	"strings"
 )
 
-func CheckUserToken(ctx *context.Context){
+func CheckUserToken (ctx *context.Context){
 	header := ctx.Request.Header
 	token,ok := header["Token"]
 	if !ok {

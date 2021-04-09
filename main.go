@@ -1,14 +1,13 @@
 package main
 
 import (
-	"github.com/astaxie/beego"
+	"github.com/beego/beego/v2/server/web"
 	_ "hello/models"
 	_ "hello/routers"
 	_ "hello/service"
-	_ "hello/tools"
 )
 
 func main() {
-	beego.Run()
+	web.Run()
 }
 
