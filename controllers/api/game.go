@@ -154,7 +154,7 @@ func (c *GameController)Betting(){
 		return
 	}
 
-	serviceCharge,_ := decimal.NewFromFloat(bettingMoney).Mul(decimal.NewFromFloat(0.97)).Round(2).Float64()
+	serviceCharge,_ := decimal.NewFromFloat(bettingMoney).Mul(decimal.NewFromFloat(0.03)).Round(2).Float64()
 	money,_ := decimal.NewFromFloat(bettingMoney).Sub(decimal.NewFromFloat(serviceCharge)).Float64()
 	gameBetting := models.GameBetting{
 		BettingNum: gamePlay.Number,

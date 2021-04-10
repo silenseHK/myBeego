@@ -52,10 +52,15 @@ func perGameAct(gameChan chan model.GamePlay,gameId int64, flag chan int64){
 	defer wg.Done()
 	var preGamePlay model.GamePlay
 	e := O.QueryTable(new(model.GamePlay)).Filter("game_id",gameId).OrderBy("-end_time").One(&preGamePlay)
-	if e != nil{
-		return
+	var startTime int64
+	if e != nil{  //没有生成过期数
+		dateTime := time.Unix(int64(time.Now().Unix()),0).Format("2006-01-02") + " 00:00:00"
+		loc, _ := time.LoadLocation("Local")    //获取时区
+		startTimeTmp,_ := time.ParseInLocation("2006-01-02 15:04:05", dateTime, loc)
+		startTime = startTimeTmp.Unix()
+	}else{
+		startTime = preGamePlay.EndTime
 	}
-	startTime := preGamePlay.EndTime
 	for i:=timeRange/gameMap[gameId];i>0;i--{
 		makeGamePlay(gameChan, gameId, &startTime)
 	}
